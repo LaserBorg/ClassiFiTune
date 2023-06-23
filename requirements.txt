@@ -1,0 +1,16 @@
+Flask
+Flask-Cors
+docopt
+numpy
+torch
+torchvision
+ExifRead
+roboflow
+
+opencv-python  # or alternatives:
+# opencv-headless-python
+# opencv-contrib-python
+
+# optional dependencies:
+tqdm
+split-folders
