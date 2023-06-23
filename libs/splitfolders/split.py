@@ -37,6 +37,13 @@ def list_files(directory):
     ]
 
 
+def check_existence(path, dirs=[]):
+    for dir in dirs:
+        if not os.path.isdir(os.path.join(path, dir)):
+            return False
+    return True
+
+
 def check_input_format(input):
     p_input = Path(input)
     if not p_input.exists():

@@ -7,10 +7,12 @@ torchvision
 ExifRead
 roboflow
 
-opencv-python  # or alternatives:
+opencv-python
 # opencv-headless-python
 # opencv-contrib-python
 
-# optional dependencies:
+###########
+# optional:
+###########
 tqdm
-split-folders
+#split-folders

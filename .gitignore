@@ -4,6 +4,4 @@ __pycache__/
 /_alt
 /checkpoint/
 /dataset/*
-!/dataset/Grace_Hopper.jpg
 /info/model_descriptions
-
