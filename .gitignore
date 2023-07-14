@@ -1,7 +1,14 @@
+# temps
 __pycache__/
 .ipynb_checkpoints/
 
-/_alt
+# irrelevant
+/__alt__/
+/__info__/*
+!/__info__/Classifier-models.xlsx
+
+# training data
+dataset/
+
+# trained models
 /checkpoint/
-/dataset/*
-/info/model_descriptions

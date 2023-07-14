@@ -11,6 +11,7 @@ import random
 import shutil
 from os import path
 
+
 try:
     from tqdm import tqdm
 
@@ -35,13 +36,6 @@ def list_files(directory):
         for f in Path(directory).iterdir()
         if f.is_file() and not f.name.startswith(".")
     ]
-
-
-def check_existence(path, dirs=[]):
-    for dir in dirs:
-        if not os.path.isdir(os.path.join(path, dir)):
-            return False
-    return True
 
 
 def check_input_format(input):
@@ -310,5 +304,17 @@ def copy_files(files_type, class_dir, output, prog_bar, move):
             else:
                 copy_fun(str(f), str(full_path))
 
+
+def check_existence(filepath, dirs=[]):
+    for dir in dirs:
+        if not path.isdir(path.join(filepath, dir)):
+            return False
+    return True
+
+
 if __name__ == "__main__":
-    ratio(input("select input directory:"), output=input("select output directory:"), seed=1337, ratio=(.8, .1, .1), group_prefix=None, move=False)
+    ratio(input("select input directory:"), 
+          output=input("select output directory:"), 
+          seed=1337, ratio=(.8, .1, .1), 
+          group_prefix=None, 
+          move=False)
