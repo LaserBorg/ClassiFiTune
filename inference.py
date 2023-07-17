@@ -1,22 +1,15 @@
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torchvision
-from torchvision import datasets, transforms
-import matplotlib.pyplot as plt
+from torchvision import transforms
 import os
 import cv2	
 import numpy as np
 import random
 
 # Inference:
-from torch.utils.data import Dataset
 from PIL import Image
 
 # Helper Functions:
-from libs.model_definitions import initialize_model
-from libs.train_model import train_model
-from libs.dataset_helpers import get_transforms
+from libs.dataset_utils import get_transforms, convert_image_to_cv
 
 
 def load_image(img_path, device="cpu"):
@@ -36,30 +29,6 @@ def predict(model, img):
         return preds
 
 
-def convert_image_format(img, normalized=True):
-    mean = [0.485, 0.456, 0.406] 
-    std =  [0.229, 0.224, 0.225]
-
-    if normalized:
-        # unnormalize mean and std for visualization
-        inv_mean = [-m / s for m, s in zip(mean, std)]
-        inv_std = [1 / s for s in std]
-
-        unnorm_transform = transforms.Normalize(mean=inv_mean, std=inv_std)
-        img = unnorm_transform(img)
-
-    if isinstance(img, torch.Tensor):
-        # torch.Tensor to opencv
-        img = torch.squeeze(img)  # remove batch dimension
-        img = (img * 255).byte()    # [0,1] -> [0,255]
-        img = img.numpy().transpose(1, 2, 0)  # (C, H, W) -> (H, W, C)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)  # RGB -> BGR
-    
-    elif isinstance(img, Image.Image):
-        # pillow to opencv
-        img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-
-    return img
 
 
 # data directory with [train, val, test] dirs
@@ -74,11 +43,11 @@ class_names = ['background', 'down', 'front', 'left', 'missing', 'up']
 visualize = True
 
 dir_path = './dataset/views_unlabeled'
-max_images = 10
+max_images = 50
 
 force_CPU = True
 device = torch.device("cuda:0" if torch.cuda.is_available() and not force_CPU else "cpu")
-print(device)
+print("inference running on device:", device)
 
 model = torch.load(checkpoint_path)
 model = model.to(torch.device(device))
@@ -112,8 +81,9 @@ for img_path in filelist:
     print("predicted label:", predicted_label)
 
     if visualize:
-        img = convert_image_format(img)
+        img = convert_image_to_cv(img)
         cv2.imshow(predicted_label, img)
-        cv2.waitKey(0)
+        cv2.waitKey(1)
 
+cv2.waitKey(0)
 cv2.destroyAllWindows()
