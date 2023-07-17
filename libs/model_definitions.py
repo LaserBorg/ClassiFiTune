@@ -22,7 +22,7 @@ def set_parameter_requires_grad(model, train_deep):
 Model Definitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
-def initialize_model(model_name, num_classes, train_deep):
+def initialize_model(model_name, num_classes, train_deep, add_softmax=False):
     # Initialize these variables which will be set in this if statement. Each of these
     #   variables is model specific.
     model_ft = None
@@ -174,4 +174,9 @@ def initialize_model(model_name, num_classes, train_deep):
         print("Invalid model name, exiting...")
         exit()
     
+
+    # Adding the Softmax layer
+    if add_softmax:
+        model_ft = nn.Sequential(model_ft, nn.Softmax(dim=1))  # dim=1 is the class dimension
+
     return model_ft, input_size

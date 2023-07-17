@@ -56,8 +56,8 @@ std =  [0.229, 0.224, 0.225]
 # data directory with [train, val, test] dirs
 data_dir = "./dataset/views_split"
 
-model_name = "mobilenet_v3_large"
-checkpoint_path = f"checkpoint/{model_name}.pt"
+model_name = "photo-sanitizer"
+checkpoint_path = f"checkpoints/{model_name}.pt"
 
 input_size = 224
 

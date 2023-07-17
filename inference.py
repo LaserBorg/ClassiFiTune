@@ -1,89 +1,125 @@
 import torch
-from torchvision import transforms
 import os
-import cv2	
-import numpy as np
-import random
+import cv2
 
-# Inference:
-from PIL import Image
-
-# Helper Functions:
-from libs.dataset_utils import get_transforms, convert_image_to_cv
+from libs.dataset_utils import load_imagefile_to_tensor, get_transforms, convert_image_to_cv, get_model_data
+from libs.path_utils import get_filelist_from_dir
 
 
-def load_image(img_path, device="cpu"):
-    '''returns
-    img: torch.Tensor'''
-    img = Image.open(img_path)
-    img = data_transforms['val'](img)
-    img = img.unsqueeze(0)
-    img = img.to(device)
-    return img
-
-
-def predict(model, img):
+def predict(model, img, apply_softmax=False):
     with torch.no_grad():
-        outputs = model(img)
-        _, preds = torch.max(outputs, 1)
-        return preds
+        class_outputs = model(img)
+
+    # normalize outputs to range[0-1] and sum=1
+    if apply_softmax:
+        class_outputs = torch.softmax(class_outputs, dim=1)
+
+    top_probability, top_prediction = torch.max(class_outputs, 1)
+
+    # [0] because top_probability and top_prediction are tensors with one element
+    return top_prediction[0], top_probability[0]
 
 
+def run_inference(checkpoint_path, images_path, force_CPU=True, apply_softmax=False, single_output=False, output_level=0):
+
+    # infer all images
+    if output_level < 2:
+        max_count = False
+    
+    # if output_level == 2, infer an show {max_count} images
+    if output_level == 2:
+        max_count = 20
+    
+    # if output_level == 3, infer and show all image but stop at each one
+    elif output_level > 2:
+        max_count = False
+
+    
+    # create list of images to predict
+    if os.path.isdir(images_path):
+        filelist = get_filelist_from_dir(images_path, max_count=max_count)
+    else:
+        filelist = [images_path]
+        single_output = True
+        
+
+    input_size, class_names = get_model_data(checkpoint_path)
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() and not force_CPU else "cpu")
+    if output_level >= 3:
+        print(f"[INFO] running inference on {device}")
+    
+    model = torch.load(checkpoint_path)
+    model = model.to(torch.device(device))
+
+    # set dropout and batch normalization layers to evaluation mode before running inference
+    model.eval()
+
+    inference_transform = get_transforms(input_size)["val"]
+
+    model = model.to(device)
+    model.eval()    
+
+    # initialize lists of resulting top-predictions and their probabilities
+    top_probabilities_list = []
+    top_predictions_list = []
+
+    for img_path in filelist:
+        img = load_imagefile_to_tensor(img_path, transform=inference_transform, device=device)
+        top_prediction, top_probability = predict(model, img, apply_softmax=apply_softmax)
+        
+        # get top prediction and its probability
+        top_predicted_label = class_names[top_prediction]
+        top_predictions_list.append(top_predicted_label)
+        top_probabilities_list.append(top_probability)
+        
+
+        # print top prediction
+        if output_level == 1:
+            print(f"predicted:\t{top_predicted_label}\t({top_probability * 100:.2f} %)")
+
+        # show all images
+        elif output_level == 2:
+            img = convert_image_to_cv(img)
+            cv2.imshow(top_predicted_label, img)
+            cv2.waitKey(1)
+        
+        # stop at each image
+        elif output_level ==3:
+            cv2.waitKey(0)
+        
+    if single_output:
+        return top_predictions_list[0], top_probabilities_list[0]
+    else:
+        return filelist, top_predictions_list, top_probabilities_list
 
 
-# data directory with [train, val, test] dirs
-data_dir = "./dataset/views_split"
+if __name__ == "__main__":
+    
+    modelfile = "photo-sanitizer-v02.pt"
+    checkpoint_path = os.path.join("checkpoints/", modelfile)
 
-model_name = "mobilenet_v3_large"
-checkpoint_path = f"checkpoint/{model_name}.pt"
-input_size = 224
-class_names = ['background', 'down', 'front', 'left', 'missing', 'up']
-
-
-visualize = True
-
-dir_path = './dataset/views_unlabeled'
-max_images = 50
-
-force_CPU = True
-device = torch.device("cuda:0" if torch.cuda.is_available() and not force_CPU else "cpu")
-print("inference running on device:", device)
-
-model = torch.load(checkpoint_path)
-model = model.to(torch.device(device))
-
-# set dropout and batch normalization layers to evaluation mode before running inference
-model.eval()
+    # print("\nINFERENCE ON SINGLE IMAGE")
+    # img_path = "images/previews/20230619-101439_(144.7_2.47_-0.67)_rectified_hinges.jpg"
+    # top_prediction, top_probability = run_inference(checkpoint_path, 
+    #                                                 img_path, 
+    #                                                 force_CPU=True,
+    #                                                 apply_softmax=False,
+    #                                                 output_level=2)
+    # print(f"{img_path} :\t{top_prediction}\t({top_probability * 100:.2f} %)")
 
 
-data_transforms = get_transforms(input_size)
-test_transform= data_transforms["val"]
-
-
-model = model.to(device)
-model.eval()
-
-# create index of all images to predict
-filelist = []
-for (root,dirs,files) in os.walk(dir_path, topdown=True):
-        for i, file in enumerate(files):
-            img_path = os.path.join(root,file)
-            filelist.append(img_path)
-
-filelist = random.sample(filelist, max_images)
-
-
-for img_path in filelist:
-    img = load_image(img_path, device=device)
-    predictions = predict(model, img)
-    predicted_label = class_names[predictions[0]]
-
-    print("predicted label:", predicted_label)
-
-    if visualize:
-        img = convert_image_to_cv(img)
-        cv2.imshow(predicted_label, img)
-        cv2.waitKey(1)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    print("\nINFERENCE OF FOLDER (GPU)")
+    images_dir = './dataset/views_unlabeled'
+    filelist, top_predictions_list, top_probabilities_list = run_inference(checkpoint_path, 
+                                                                           images_dir, 
+                                                                           force_CPU=False,
+                                                                           apply_softmax=False,
+                                                                           output_level = 2)
+    for file in filelist:
+        prediction = top_predictions_list[filelist.index(file)]
+        probability = top_probabilities_list[filelist.index(file)]
+        print(f"{file} :\t{prediction}\t({probability * 100:.2f} %)")
+    
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()

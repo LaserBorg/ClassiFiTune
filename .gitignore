@@ -11,4 +11,4 @@ __pycache__/
 dataset/
 
 # trained models
-/checkpoint/
+/checkpoints/
