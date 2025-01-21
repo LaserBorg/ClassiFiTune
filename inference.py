@@ -96,7 +96,7 @@ def run_inference(checkpoint_path, images_path, force_CPU=True, apply_softmax=Fa
 
 if __name__ == "__main__":
     
-    modelfile = "photo-sanitizer-v02.pt"
+    modelfile = "mobilenet_v3_large.pt"
     checkpoint_path = os.path.join("checkpoints/", modelfile)
 
     # print("\nINFERENCE ON SINGLE IMAGE")
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
 
     print("\nINFERENCE OF FOLDER (GPU)")
-    images_dir = './dataset/views_unlabeled'
+    images_dir = './dataset'
     filelist, top_predictions_list, top_probabilities_list = run_inference(checkpoint_path, 
                                                                            images_dir, 
                                                                            force_CPU=False,

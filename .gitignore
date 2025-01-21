@@ -2,6 +2,8 @@
 __pycache__/
 .ipynb_checkpoints/
 
+finetuning_example.ipynb
+
 # irrelevant
 /__alt__/
 /__info__/*

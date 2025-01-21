@@ -54,9 +54,9 @@ mean = [0.485, 0.456, 0.406]
 std =  [0.229, 0.224, 0.225]
 
 # data directory with [train, val, test] dirs
-data_dir = "./dataset/views_split"
+data_dir = "./dataset/"
 
-model_name = "photo-sanitizer"
+model_name = "mobilenet_v3_large"
 checkpoint_path = f"checkpoints/{model_name}.pt"
 
 input_size = 224
