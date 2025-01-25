@@ -1,18 +1,11 @@
-Flask
-Flask-Cors
-docopt
 numpy
 torch
 torchvision
-ExifRead
-roboflow
+pillow
+opencv-python  # or opencv-headless-python / opencv-contrib-python
 
-opencv-python
-# opencv-headless-python
-# opencv-contrib-python
-
-###########
 # optional:
-###########
 tqdm
-#split-folders
+
+onnx
+onnxruntime

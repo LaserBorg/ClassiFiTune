@@ -10,7 +10,10 @@ finetuning_example.ipynb
 !/__info__/Classifier-models.xlsx
 
 # training data
-dataset/
+dataset/*
+!dataset/_raw/
+dataset/_raw/*
+!dataset/_raw/example-dataset-url.txt
 
 # trained models
 /checkpoints/

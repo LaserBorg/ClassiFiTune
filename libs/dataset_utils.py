@@ -25,10 +25,11 @@ def load_imagefile_to_tensor(img_path, transform=None, device="cpu"):
     return img
 
 
-def get_transforms(input_size, scale_range=[1,1], hflip=0):
+def get_transforms(input_size, scale_range=[1,1], hflip=0, mean=None, std=None):
     # ImageNet Constants
-    mean = [0.485, 0.456, 0.406] 
-    std =  [0.229, 0.224, 0.225]
+    if mean is None or std is None:
+        mean = [0.485, 0.456, 0.406] 
+        std =  [0.229, 0.224, 0.225]
 
     data_transforms = {
         # for training: Feature augmentation
@@ -85,13 +86,13 @@ def convert_image_to_cv(img, normalized=True, RGB2BGR=True, device="cpu"):
 
 
 def get_model_data(path):
-    '''Reads variables from the JSON file. Returns input_size and class_names from model checkpoint'''
+    '''Reads variables from the JSON file. Returns input_size and class_labels from model checkpoint'''
 
     path = modify_path(path, attrib="metadata", ext="json")
 
     with open(path, 'r') as f:
         data = json.load(f)
         input_size = data['input_size']
-        class_names = data['class_names']
+        class_labels = data['class_labels']
     
-    return input_size, class_names
+    return input_size, class_labels
