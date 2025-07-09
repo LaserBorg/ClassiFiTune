@@ -1,6 +1,7 @@
 import time
 import copy
 import torch
+from tqdm import tqdm
 
 
 """
@@ -24,18 +25,22 @@ training and validation accuracies are printed.
 """
 
 
-def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, device="cuda:0"):
+def train_model(
+    model, dataloaders, criterion, optimizer, num_epochs=25, device="cuda:0",
+    scheduler=None, early_stopping_patience=10, checkpoint_path=None
+):
     since = time.time()
-
     val_acc_history = []
-    
+    val_loss_history = []
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
+    best_loss = float('inf')
+    epochs_no_improve = 0
+    early_stop = False
 
     for epoch in range(num_epochs):
-        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        print(f'Epoch {epoch+1}/{num_epochs}')
         print('-' * 10)
-
         # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
             if phase == 'train':
@@ -45,9 +50,10 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, device=
 
             running_loss = 0.0
             running_corrects = 0
-
+            dataloader = dataloaders[phase]
+            loop = tqdm(dataloader, desc=f"{phase} epoch {epoch+1}", leave=False)
             # Iterate over data.
-            for inputs, labels in dataloaders[phase]:
+            for inputs, labels in loop:
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
@@ -85,25 +91,38 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, device=
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
+                loop.set_postfix(loss=loss.item())
+            epoch_loss = running_loss / len(dataloader.dataset)
+            epoch_acc = running_corrects.double() / len(dataloader.dataset)
 
-            epoch_loss = running_loss / len(dataloaders[phase].dataset)
-            epoch_acc = running_corrects.double() / len(dataloaders[phase].dataset)
-
-            print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
-
+            print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
             # deep copy the model
-            if phase == 'val' and epoch_acc > best_acc:
-                best_acc = epoch_acc
-                best_model_wts = copy.deepcopy(model.state_dict())
             if phase == 'val':
                 val_acc_history.append(epoch_acc)
-
+                val_loss_history.append(epoch_loss)
+                if scheduler is not None:
+                    scheduler.step(epoch_loss)
+                # Early stopping
+                if epoch_loss < best_loss:
+                    best_loss = epoch_loss
+                    best_model_wts = copy.deepcopy(model.state_dict())
+                    epochs_no_improve = 0
+                    # Model checkpointing
+                    if checkpoint_path:
+                        torch.save(model.state_dict(), checkpoint_path)
+                else:
+                    epochs_no_improve += 1
+                if epochs_no_improve >= early_stopping_patience:
+                    print(f"Early stopping at epoch {epoch+1}")
+                    early_stop = True
+                    break
+        if early_stop:
+            break
         print()
-
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
-    print('Best val Acc: {:4f}'.format(best_acc))
+    print('Best val Loss: {:4f}'.format(best_loss))
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    return model, val_acc_history
+    return model, val_acc_history, val_loss_history

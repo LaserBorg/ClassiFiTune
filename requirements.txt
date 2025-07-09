@@ -3,8 +3,11 @@ torch
 torchvision
 pillow
 opencv-python  # or opencv-headless-python / opencv-contrib-python
+albumentations
+pyyaml
 
-# optional:
+matplotlib
+jupyter
 tqdm
 
 onnx
