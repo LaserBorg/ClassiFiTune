@@ -38,12 +38,12 @@ A full list of torchvision classifiers with weights, accuracy, parameter count, 
 
 ```bash
 # create python venv
-python3 -m venv ~/venv
-source ~/venv/bin/activate
+python3 -m venv ~/venvs/venv312
+source ~/venvs/venv312/bin/activate
 
 # Install PyTorch
 pip install torch torchvision
-# pip install torch==2.3.0 torchvision==0.18.0 --index-url https://download.pytorch.org/whl/cu118
+# pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu118
 
 # Install other requirements (opencv, matplotlib, onnx, jupyter, etc.)
 pip install -r requirements.txt

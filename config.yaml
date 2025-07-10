@@ -15,7 +15,7 @@ input_size: [224, 224]
 add_softmax: false
 
 # Augmentation
-augmentations: false          # use advanced albumentations
+augmentations: false 
 scale_range: [0.75, 1.0]
 
 # Training
