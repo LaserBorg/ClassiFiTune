@@ -1,0 +1,75 @@
+# TinyViT Training Configuration
+
+# Data directories
+data_dir: "dataset"
+output_dir: "output"
+logs_dir: "output/logs"
+
+# Base model
+base_model: "21m_22k_384"  # see options below
+# Output
+checkpoint_name: "tinyvit_21m_384_finetuned.pth"
+
+# Stage 1: Head training with frozen backbone
+stage1:
+  epochs: 15
+  learning_rate: 1e-3
+  warmup_epochs: 1
+  min_lr: 1e-5
+  batch_size: 32
+
+# Stage 2: Full fine-tuning
+stage2:
+  epochs: 5
+  learning_rate: 2.5e-4
+  warmup_epochs: 2
+  min_lr: 1e-5
+  batch_size: 12
+
+# Training settings
+layer_lr_decay: 0.8
+weight_decay: 1e-8
+use_amp: true
+patience: 7
+gradient_clip_norm: 5.0
+eval_bn: true  # Set batch norm to eval mode during training
+
+# Optimizer settings
+optimizer:
+  name: "adamw"
+  eps: 1e-8
+  betas: [0.9, 0.999]
+
+# Data augmentation settings
+augmentation:
+  horizontal_flip: 0.5
+  rotation_limit: 15
+  rotation_prob: 0.5
+  color_jitter:
+    brightness: 0.4
+    contrast: 0.4
+    saturation: 0.4
+    hue: 0.1
+    prob: 0.8
+  noise_and_blur:
+    prob: 0.2
+    gaussian_noise:
+      var_limit: [10.0, 50.0]
+      prob: 0.5
+    gaussian_blur:
+      blur_limit: [3, 5]
+      prob: 0.5
+  coarse_dropout:
+    max_holes: 8
+    max_height: 32
+    max_width: 32
+    prob: 0.25
+
+# Available model configurations for reference
+available_models:
+  - "5m_1k_224"     # TinyViT-5M, ImageNet-1K pretrained, 224x224
+  - "11m_1k_224"    # TinyViT-11M, ImageNet-1K pretrained, 224x224  
+  - "21m_1k_224"    # TinyViT-21M, ImageNet-1K pretrained, 224x224
+  - "21m_22k_224"   # TinyViT-21M, ImageNet-22K pretrained, 224x224
+  - "21m_22k_384"   # TinyViT-21M, ImageNet-1K pretrained, 384x384
+  - "21m_22k_512"   # TinyViT-21M, ImageNet-1K pretrained, 512x512

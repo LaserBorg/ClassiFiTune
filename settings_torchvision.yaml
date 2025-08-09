@@ -5,10 +5,6 @@ raw_data_dir: "./dataset/_raw/"
 split_data_dir: "./dataset/"  # [train, val, test] dirs
 dloader_workers: 6
 
-# ImageNet Normalization values
-mean: [0.485, 0.456, 0.406]
-std: [0.229, 0.224, 0.225]
-
 # Model
 model_type: mobilenet_v3_large
 input_size: [224, 224]
@@ -19,16 +15,16 @@ augmentations: false
 scale_range: [0.75, 1.0]
 
 # Training
-batch_size: 50
+batch_size: 16
 num_epochs: 20
-learning_rate: 0.0001
+learning_rate: 1e-4
 optimizer_name: adam
 train_deep: true
 scheduler: reduce_on_plateau  # options: reduce_on_plateau, step, cosine
 scheduler_patience: 2         # epochs with no improvement before reducing LR
 scheduler_factor: 0.5         # LR reduction factor
 early_stopping_patience: 4    # epochs with no improvement before stopping
-checkpoints_dir: checkpoints/
+output_dir: output/
 
 # List of available models
 model_list:
@@ -46,3 +42,4 @@ model_list:
   - efficientnet_v2_m
   - convnext_base
   - swin_v2_b
+  - TinyViT

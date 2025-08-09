@@ -1,0 +1,1 @@
+https://github.com/wkcn/TinyViT-model-zoo/releases/tag/checkpoints

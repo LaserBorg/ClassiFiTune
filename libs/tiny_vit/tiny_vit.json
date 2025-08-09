@@ -1,0 +1,80 @@
+{
+    "5m_1k_224": {
+        "weights": "checkpoints/tiny_vit_5m_22kto1k_distill.pth",
+        "classlabels": "checkpoints/imagenet1k_classes.json",
+        "is_finetuned": false,
+        "model_config": {
+            "depths": [2, 2, 6, 2],
+            "num_heads": [2, 4, 5, 10],
+            "window_sizes": [7, 7, 14, 7],
+            "embed_dims": [64, 128, 160, 320],
+            "img_size": 224,
+            "drop_path_rate": 0.0
+        }
+    },
+    "11m_1k_224": {
+        "weights": "checkpoints/tiny_vit_11m_22kto1k_distill.pth",
+        "classlabels": "checkpoints/imagenet1k_classes.json",
+        "is_finetuned": false,
+        "model_config": {
+            "depths": [2, 2, 6, 2],
+            "num_heads": [2, 4, 8, 14],
+            "window_sizes": [7, 7, 14, 7],
+            "embed_dims": [64, 128, 256, 448],
+            "img_size": 224,
+            "drop_path_rate": 0.0
+        }
+    },
+    "21m_1k_224": {
+        "weights": "checkpoints/tiny_vit_21m_22kto1k_distill.pth",
+        "classlabels": "checkpoints/imagenet1k_classes.json",
+        "is_finetuned": false,
+        "model_config": {
+            "depths": [2, 2, 6, 2],
+            "num_heads": [3, 6, 12, 18],
+            "window_sizes": [7, 7, 14, 7],
+            "embed_dims": [96, 192, 384, 576],
+            "img_size": 224,
+            "drop_path_rate": 0.1
+        }
+    },
+    "21m_22k_224": {
+        "weights": "checkpoints/tiny_vit_21m_22k_distill.pth",
+        "classlabels": "checkpoints/imagenet22k_classes.json",
+        "is_finetuned": false,
+        "model_config": {
+            "depths": [2, 2, 6, 2],
+            "num_heads": [3, 6, 12, 18],
+            "window_sizes": [7, 7, 14, 7],
+            "embed_dims": [96, 192, 384, 576],
+            "img_size": 224,
+            "drop_path_rate": 0.1
+        }
+    },
+    "21m_22k_384": {
+        "weights": "checkpoints/tiny_vit_21m_22kto1k_384_distill.pth",
+        "classlabels": "checkpoints/imagenet1k_classes.json",
+        "is_finetuned": false,
+        "model_config": {
+            "depths": [2, 2, 6, 2],
+            "num_heads": [3, 6, 12, 18],
+            "window_sizes": [12, 12, 24, 12],
+            "embed_dims": [96, 192, 384, 576],
+            "img_size": 384,
+            "drop_path_rate": 0.1
+        }
+    },
+    "21m_22k_512": {
+        "weights": "checkpoints/tiny_vit_21m_22kto1k_512_distill.pth",
+        "classlabels": "checkpoints/imagenet1k_classes.json",
+        "is_finetuned": false,
+        "model_config": {
+            "depths": [2, 2, 6, 2],
+            "num_heads": [3, 6, 12, 18],
+            "window_sizes": [16, 16, 32, 16],
+            "embed_dims": [96, 192, 384, 576],
+            "img_size": 512,
+            "drop_path_rate": 0.1
+        }
+    }
+}

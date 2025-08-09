@@ -12,3 +12,12 @@ tqdm
 
 onnx
 onnxruntime
+onnxscript
+
+scikit-learn
+timm
+yacs
+termcolor
+wandb
+seaborn
+tensorboard
