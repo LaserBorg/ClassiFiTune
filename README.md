@@ -15,6 +15,15 @@ with optional ONNX conversion & prediction.
 
 ## available models for finetuning
 
+NEW: TinyViT:
+- TinyViT-5M, ImageNet-1K 224
+- TinyViT-11M, ImageNet-1K 224
+- TinyViT-21M, ImageNet-1K 224
+- TinyViT-21M, ImageNet-22K 224 (22K classes)
+- TinyViT-21M, ImageNet-1K 384 (higher resolution)
+- TinyViT-21M, ImageNet-1K 512 (highest resolution)
+
+using torchvision models:
 - resnet18
 - resnet50
 - alexnet
@@ -53,33 +62,20 @@ unzip example_dataset.zip
 mv example_dataset _raw
 mv _raw dataset/
 rm example_dataset.zip
+
+jupyter notebook  # then open finetune_tinyvit.ipynb finetune_torchvision.ipynb and run it
 ```
 
-## Usage
-- Open and run the Jupyter notebook finetuning.ipynb for a step-by-step workflow.
-- Customize model selection, training parameters, and dataset paths as needed.
-- The notebook covers data loading, model initialization, training, validation, ONNX export, and inference.
-
-## ToDos
-- use best pth file for onnx conversion and inference
-- fix & enable albumentations
-- get learning rate scheduler type and parameters from yaml
-- use yaml parameters for libs functions
-- store current epoch and loss in metadata
-- save metadata as yaml
-- update readme
 
 - [Object detection](https://docs.pytorch.org/tutorials/intermediate/torchvision_tutorial.html)
 
 
-## ------------------------------------------------------------------------
-## TinyViT Finetuning and Inference
+
+## from the TinyViT repo (https://github.com/wkcn/tinyvit)
 
 TinyViT is a new family of **tiny and efficient** vision transformers pretrained on **large-scale** datasets with our proposed **fast distillation framework**. The central idea is to **transfer knowledge** from **large pretrained models** to small ones. The logits of large teacher models are sparsified and stored in disk in advance to **save the memory cost and computation overheads**.
 
 :rocket: TinyViT with **only 21M parameters** achieves **84.8%** top-1 accuracy on ImageNet-1k, and **86.5%** accuracy under 512x512 resolutions.
-
-this repo uses the pretrained checkpoints of the original authors but provides a more compact solution for finetuning and inference.
 
 ### Model Zoo
 
@@ -98,7 +94,7 @@ TinyViT-21M                                | IN-1k    |224x224| 83.1  | 96.5  | 
 
 
 
-### TinyViT Fine-tuning Script
+## TinyViT Fine-tuning Script
 
 Features:
 - Load pretrained weights from checkpoint
@@ -109,42 +105,42 @@ Features:
 
 improvements based on the official TinyViT implementation:
 
-#### 1. Learning Rate Strategy (Major Improvement)
+### 1. Learning Rate Strategy (Major Improvement)
 - **Cosine annealing with warmup**
 - **Layer-wise learning rate decay** (0.8)
 - **warmup periods** (1 epoch for stage 1, 2 epochs for stage 2)
 - **Low base learning rates** (1e-3 for head, 2.5e-4 for deep training)
 
-#### 2. Weight Decay Optimization
+### 2. Weight Decay Optimization
 - **Selective weight decay** - excludes bias and normalization layers
 - **low weight decay** (1e-8) for fine-tuning vs standard 0.05
 - **Proper parameter grouping** following TinyViT's approach
 
-#### 3. Training Stability Improvements
+### 3. Training Stability Improvements
 - **Gradient clipping** (max_norm=5.0) prevents exploding gradients
 - **BatchNorm in eval mode** during training
 - **Better mixed precision handling** with unscaling for gradient clipping
 
-#### 4. Enhanced Data Augmentation
+### 4. Enhanced Data Augmentation
 - A.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8)
 - A.Rotate(limit=15, p=0.5)
 - A.CoarseDropout(max_holes=8, max_height=32, max_width=32, p=0.25)  # Random erasing
 - A.OneOf([GaussNoise, GaussianBlur], p=0.2)  # noise augmentation
 
-#### 5. Training Configuration Updates
+### 5. Training Configuration Updates
 - **15 epochs frozen + 5 epochs fine-tuning** 
 - **Increased patience** (7)
 
-#### 6. Key Functions
+### 6. Key Functions
 1. `set_weight_decay()` - Proper weight decay handling
 2. `get_cosine_scheduler_with_warmup()` - Advanced LR scheduling  
 3. Enhanced `train_epoch()` with gradient clipping and BN eval mode
 
 
 
-### Citation
+## Citation
 
-If this repo is helpful for you, please consider to cite it. :mega: Thank you! :)
+If TinyViT is helpful for you, please consider to cite it. :mega: Thank you! :)
 
 ```bibtex
 @InProceedings{tiny_vit,
@@ -155,6 +151,6 @@ If this repo is helpful for you, please consider to cite it. :mega: Thank you! :
 }
 ```
 
-## License
+## Licenses
 
 - [License](./LICENSE)
