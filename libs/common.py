@@ -77,32 +77,32 @@ def tensor_to_array(image, idx=0, mean=mean, std=std, device="cpu"):
     return img
 
 # converts torch.Tensor or PIL.Image to cv2 image
-def img_or_tensor_to_array(img, normalized=True, RGB2BGR=True, device="cpu"):
-    if normalized:
-        # unnormalize mean and std for visualization
-        inv_mean = [-m / s for m, s in zip(mean, std)]
-        inv_std = [1 / s for s in std]
-
-        unnorm_transform = transforms.Normalize(mean=inv_mean, std=inv_std)
-        img = unnorm_transform(img)
-
+def img_or_tensor_to_array(img, normalized=True, RGB2BGR=False, device="cpu"):
     if isinstance(img, torch.Tensor):
+        if normalized:
+            # unnormalize mean and std for visualization
+            inv_mean = [-m / s for m, s in zip(mean, std)]
+            inv_std = [1 / s for s in std]
+
+            unnorm_transform = transforms.Normalize(mean=inv_mean, std=inv_std)
+            img = unnorm_transform(img)
+
         # torch.Tensor to opencv
         img = torch.squeeze(img)    # remove batch dimension
         img = (img * 255).byte()    # [0,1] -> [0,255]
-
+    
         if device.lower() == "cpu":
             img = img.cpu()
-
+    
         img = img.numpy().transpose(1, 2, 0)        # (C, H, W) -> (H, W, C)
-
-        if RGB2BGR:
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)  # RGB -> BGR
     
     elif isinstance(img, Image.Image):
         # pillow to opencv
-        img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+        img = np.array(img)
 
+    if RGB2BGR and isinstance(img, np.ndarray):
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    
     return img
 
 # converts PIL.Image to torch.Tensor
@@ -121,15 +121,8 @@ def img_to_tensor(img, transform=None, device="cpu"):
 # ------------------------------------------------------------------
 # VISUALISATION
 
-def imshow(image, title=None):
-    if isinstance(image, torch.Tensor):
-        img = tensor_to_array(image)
-
-    elif isinstance(image, Image.Image):
-        img = np.array(image)
-
-    elif not isinstance(image, np.ndarray):
-        raise TypeError(f"Expected image to be PIL Image or numpy array, got {type(image)}")
+def imshow_notebook(title, image):
+    img = img_or_tensor_to_array(image)
 
     ax = plt.subplot(2, 2, 1)
     ax.axis('off')
