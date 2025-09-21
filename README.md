@@ -47,21 +47,29 @@ A full list of torchvision classifiers with weights, accuracy, parameter count, 
 
 ```bash
 # create python venv
-python3 -m venv ~/venvs/venv312
-source ~/venvs/venv312/bin/activate
+sudo apt update && sudo apt install python3-venv
+python3 -m venv ~/.venv
+source ~/.venv/bin/activate
 
 # Install PyTorch (see https://pytorch.org/get-started/locally/)
+# CUDA: check compute version https://developer.nvidia.com/cuda-gpus, https://developer.nvidia.com/cuda-legacy-gpus
+# e.g. for GTX 960 (Maxwell: compute 5.2) <= CUDA 11.8
+# pip install torch==2.7.1 torchvision==0.22.1 --index-url https://download.pytorch.org/whl/cu118
 pip install torch torchvision
 
 # Install other requirements (opencv, matplotlib, onnx, jupyter, etc.)
 pip install -r requirements.txt
 
-# Download example dataset
-wget -O example_dataset.zip "https://1drv.ms/u/s!AgIimkCJY7fxh0wwll9jLBqr_nMQ?e=t72EgV"
-unzip example_dataset.zip
-mv example_dataset _raw
-mv _raw dataset/
-rm example_dataset.zip
+
+# Download checkpoint, e.g. 384 px
+wget -P checkpoints/ "https://github.com/wkcn/TinyViT-model-zoo/releases/download/checkpoints/tiny_vit_21m_22kto1k_384_distill.pth"
+
+
+# Download example dataset from OneDrive (wget doesn't work for OneDrive)
+# https://1drv.ms/u/s!AgIimkCJY7fxh0wwll9jLBqr_nMQ?e=t72EgV
+mv example_dataset.zip dataset/_raw && cd dataset/_raw
+unzip example_dataset.zip && rm example_dataset.zip
+
 
 jupyter notebook  # then open finetune_tinyvit.ipynb finetune_torchvision.ipynb and run it
 ```

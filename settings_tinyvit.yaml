@@ -16,15 +16,15 @@ stage1:
   learning_rate: 1e-3
   warmup_epochs: 1
   min_lr: 1e-5
-  batch_size: 32
+  batch_size: 40
 
 # Stage 2: Full fine-tuning
 stage2:
   epochs: 5
   learning_rate: 2.5e-4
-  warmup_epochs: 2
+  warmup_epochs: 1
   min_lr: 1e-5
-  batch_size: 12
+  batch_size: 7
 
 # Training settings
 layer_lr_decay: 0.8
@@ -33,6 +33,8 @@ use_amp: true
 patience: 7
 gradient_clip_norm: 5.0
 eval_bn: true  # Set batch norm to eval mode during training
+mean: [0.485, 0.456, 0.406]
+std: [0.229, 0.224, 0.225]
 
 # Optimizer settings
 optimizer:

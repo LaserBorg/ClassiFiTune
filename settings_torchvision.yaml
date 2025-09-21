@@ -25,6 +25,8 @@ scheduler_patience: 2         # epochs with no improvement before reducing LR
 scheduler_factor: 0.5         # LR reduction factor
 early_stopping_patience: 4    # epochs with no improvement before stopping
 output_dir: output/
+mean: [0.485, 0.456, 0.406]
+std: [0.229, 0.224, 0.225]
 
 # List of available models
 model_list:
