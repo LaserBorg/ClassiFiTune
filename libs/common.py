@@ -141,13 +141,21 @@ def imshow(image, title=None):
 # ------------------------------------------------------------------
 # PATH UTILS
 
-def get_random_image(images_dir, ext=".jpg"):
+def get_random_image(images_dir, ext=".jpg", seed=None):
+    """
+    Selects a random image from a directory.
+    An optional seed can be provided for reproducibility.
+    """
+    if seed is not None:
+        random.seed(seed)
     # List all files in the directory
     all_files = os.listdir(images_dir)
-    # Filter out only JPG files
-    jpg_files = [f for f in all_files if f.endswith(ext)]
-    # Select a random JPG file
-    random_image = random.choice(jpg_files)
+    # Filter for given file extension
+    filtered_files = [f for f in all_files if f.endswith(ext)]
+    if not filtered_files:
+        return None
+    # Select a random file
+    random_image = random.choice(filtered_files)
     # Return the full path to the random image
     return os.path.join(images_dir, random_image)
 
