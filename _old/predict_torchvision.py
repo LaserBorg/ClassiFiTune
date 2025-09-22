@@ -1,76 +1,14 @@
-# ignore UserWarning
-import warnings
-warnings.filterwarnings("ignore", category=UserWarning, module="libs.tiny_vit.tiny_vit")
+# # PyTorch and ONNX Prediction
 
 import os
 from PIL import Image
-import cv2
-import numpy as np
 import torch
 from torchvision import transforms
-import onnxruntime as ort
-import torch.nn.functional as F
+import numpy as np
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 
-from libs.common import load_dict, img_to_tensor, ensure_tuple, get_random_image, img_or_tensor_to_array
-from libs.tiny_vit.tiny_vit_inference import TinyViTInference
+from libs.common import load_dict, img_to_tensor, ensure_tuple, get_random_image, imshow
 
-
-def imshow(title, image, width=640):
-    img_rgb = img_or_tensor_to_array(image)
-
-    # Maintain aspect ratio for a fixed width
-    original_height, original_width, _ = img_rgb.shape
-    if original_width > 0:
-        aspect_ratio = original_height / original_width
-        new_height = int(width * aspect_ratio)
-        img_rgb = cv2.resize(img_rgb, (width, new_height))
-
-    img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
-    cv2.imshow(title, img_bgr)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-
-# get a random image from the validation set
-image_path = get_random_image('dataset/test/ants', seed=13)
-img = Image.open(image_path)
-
-
-#-------------------------------------------------------
-## TINYVIT MODEL
-
-## on pretrained TinyViT
-classifier_pretrained = TinyViTInference(variant="21m_22k_384", device="cuda")
-
-# prediction
-scores_np, inds_np = classifier_pretrained.predict(img, topk=5, print_results=False)
-
-# [0] classnames might contain more than one string
-predicted_label = classifier_pretrained.classnames[str(inds_np[0])][0]
-probability = scores_np[0]
-
-imshow(f'{predicted_label} ({probability:.2f})', img)
-
-
-# # on finetuned TinyViT
-classifier_finetuned = TinyViTInference(metadata_path="output/tinyvit_21m_384_finetuned_metadata.json", device="cuda")
-
-print(f"finetuned classes: {[labels[0] for labels in classifier_finetuned.classnames.values()]}")
-
-# prediction
-scores_np_ft, inds_np_ft = classifier_finetuned.predict(img, topk=3, print_results=False)
-
-# [0] classnames might contain more than one string
-predicted_label = classifier_finetuned.classnames[str(inds_np_ft[0])][0]
-probability = scores_np_ft[0]
-
-imshow(f'{predicted_label} ({probability:.2f})', img)
-
-
-
-# ----------------------------------------------------
-## TORCHVISION MODELS
 
 settings_path = 'settings_torchvision.yaml'
 settings = load_dict(settings_path)
@@ -92,10 +30,15 @@ test_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean, std)])
 
+# get a random image from the validation set
+image_path = get_random_image('dataset/test/ants', seed=13)
+img = Image.open(image_path)
 
 # load class labels from metadata.json
 class_labels = load_dict(json_path)["class_labels"]
 
+
+# # Pytorch prediction
 device = torch.device("cpu")  # ("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def torch_predict(model, image, class_labels):
@@ -123,9 +66,10 @@ predicted_label, probability = torch_predict(model, image_tensor, class_labels)
 print(f'Predicted: {predicted_label} ({probability:.2f})')
 imshow(f'{predicted_label} ({probability:.2f})', image_tensor)
 
+# # ONNX prediction
+import onnxruntime as ort
+import torch.nn.functional as F
 
-# ----------------------------------------------------
-# TORCHVISION MODEL CONVERTED TO ONNX
 
 # Load the ONNX model
 onnx_path = os.path.join(output_dir, model_name + ".onnx")

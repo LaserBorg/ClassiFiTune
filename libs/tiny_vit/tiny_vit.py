@@ -131,7 +131,7 @@ class PatchMerging(nn.Module):
     def forward(self, x):
         if x.ndim == 3:
             H, W = self.input_resolution
-            B = len(x)
+            B = x.shape[0]
             # (B, C, H, W)
             x = x.view(B, H, W, -1).permute(0, 3, 1, 2)
 
@@ -331,8 +331,17 @@ class TinyViTBlock(nn.Module):
     def forward(self, x):
         H, W = self.input_resolution
         B, L, C = x.shape
-        assert L == H * W, "input feature has wrong size"
+        # Avoid converting tensor-derived values to Python booleans while tracing/ONNX export.
+        # Use a safe check: when tracing, don't perform Python-level comparisons that depend
+        # on tensor shapes (these can be symbolic). Instead, verify sizes when available
+        # at runtime (non-tracing) and otherwise rely on downstream ops to fail if sizes
+        # are incompatible.
+        if not torch.jit.is_tracing():
+            # Normal (eager) execution: perform strict shape validation
+            if L != H * W:
+                raise RuntimeError("input feature has wrong size")
         res_x = x
+        # Safe equality check: these are Python ints (from configuration), so it's fine.
         if H == self.window_size and W == self.window_size:
             x = self.attn(x)
         else:

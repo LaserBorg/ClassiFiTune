@@ -13,6 +13,38 @@ with optional ONNX conversion & prediction.
 - Jupyter notebook workflow for easy experimentation
 
 
+## Inference
+
+The repository contains notebooks and `inference.py` for running inference with TinyViT and torchvision models.
+
+Unified inference wrapper
+-------------------------
+You can use the `ClassifierInference` helper at `libs/classifier_inference.py` to load and run inference for TinyViT, Torchvision (PyTorch) checkpoints and ONNX models using a single API.
+
+Example usage (python):
+
+```python
+from PIL import Image
+from libs.classifier_inference import ClassifierInference
+
+# TinyViT pretrained variant
+tv = ClassifierInference(backend='tinyvit', variant='21m_22k_384', device='cpu')
+results, elapsed = tv.predict(Image.open('path/to/image.jpg'), topk=3)
+
+# From metadata (auto-detect backend)
+instance = ClassifierInference.from_metadata('output/tinyvit_21m_384_finetuned_metadata.json')
+results, _ = instance.predict(Image.open('path/to/image.jpg'))
+
+# Torchvision checkpoint
+tv = ClassifierInference(backend='torchvision', metadata_path='output/mobilenet_v3_large_metadata.json', model_path='output/mobilenet_v3_large.pth', model_name='mobilenet_v3_large', device='cpu')
+results, _ = tv.predict(Image.open('path/to/image.jpg'))
+
+# ONNX model
+onnx = ClassifierInference(backend='onnx', onnx_path='output/mobilenet_v3_large.onnx', metadata_path='output/mobilenet_v3_large_metadata.json')
+results, _ = onnx.predict(Image.open('path/to/image.jpg'))
+```
+
+
 ## available models for finetuning
 
 NEW: TinyViT:

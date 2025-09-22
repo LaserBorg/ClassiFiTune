@@ -121,6 +121,22 @@ def img_to_tensor(img, transform=None, device="cpu"):
 # ------------------------------------------------------------------
 # VISUALISATION
 
+def imshow(title, image, width=640, waitkey=0):
+    img_rgb = img_or_tensor_to_array(image)
+
+    # Maintain aspect ratio for a fixed width
+    original_height, original_width, _ = img_rgb.shape
+    if original_width > 0:
+        aspect_ratio = original_height / original_width
+        new_height = int(width * aspect_ratio)
+        img_rgb = cv2.resize(img_rgb, (width, new_height))
+
+    img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
+    cv2.imshow(title, img_bgr)
+    cv2.waitKey(waitkey)
+    cv2.destroyAllWindows()
+
+
 def imshow_notebook(title, image):
     img = img_or_tensor_to_array(image)
 
